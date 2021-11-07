@@ -33,6 +33,8 @@ export default new Vuex.Store({
     },
     SET_LOGOUT(state) {
       state.token = "";
+      state.is_error_getting_user = false;
+      state.error_getting_user_message = "";
       localStorage.removeItem("token");
       delete axios.defaults.headers.common["Authorization"];
     },

@@ -19,9 +19,16 @@
     </template>
     <template v-else>
       <v-card class="elevation-9 py-6 px-4" min-height="540px">
-        <v-card-text class="error--text">
+        <v-card-text class="text-center error--text text-h6 py-10">
           {{ error_getting_user_message }}
         </v-card-text>
+        <v-card-actions class="justify-center">
+          <v-btn min-width="180" color="primary" to="/login">Вход</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn min-width="180" color="primary" outlined to="/register">
+            Регистрация
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </template>
   </div>
