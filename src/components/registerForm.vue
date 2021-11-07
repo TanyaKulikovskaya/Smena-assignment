@@ -1,85 +1,104 @@
 <template>
   <v-card class="elevation-9" min-height="420px">
     <v-toolbar dark color="primary">
-      <v-toolbar-title class="mx-auto text-uppercase">Регистрация</v-toolbar-title>
-    </v-toolbar>
-    <v-card-text>
-      <v-form ref="registerForm" v-model="valid" lazy-validation>
-        <v-text-field
-          v-model="registerUserName"
-          label="Имя пользователя"
-          type="text"
-          :rules="registerUserNameRules"
-          required
-        ></v-text-field>
-        <v-text-field
-          v-model="registerPassword"
-          label="Пароль"
-          type="password"
-          :rules="registerPasswordRules"
-          required
-        ></v-text-field>
-        <v-text-field
-          v-model="registerPasswordConfirmation"
-          label="Подтверждение пароля"
-          type="password"
-          :rules="registerPasswordConfirmationRules"
-          required
-        ></v-text-field>
-      </v-form>
-    </v-card-text>
-    <v-card-actions>
-      <v-btn min-width="180" color="primary" @click="register">
+      <v-toolbar-title class="mx-auto text-uppercase">
         Регистрация
-      </v-btn>
-      <v-spacer></v-spacer>
-      <v-btn min-width="120" color="primary" outlined to="/login">Вход</v-btn>
-    </v-card-actions>
-    <v-card-text v-if="showRegisterError" class="error--text">
-      {{ registerErrorMessage }}
-    </v-card-text>
+      </v-toolbar-title>
+    </v-toolbar>
+    <template v-if="!showSuccess">
+      <v-card-text>
+        <v-form ref="form" v-model="valid">
+          <v-text-field
+            v-model="username"
+            label="Имя пользователя"
+            type="text"
+            :rules="usernameRules"
+            autofocus
+            required
+          ></v-text-field>
+          <v-text-field
+            v-model="password"
+            label="Пароль"
+            type="password"
+            :rules="passwordRules"
+            required
+          ></v-text-field>
+          <v-text-field
+            v-model="passwordConfirmation"
+            label="Подтверждение пароля"
+            type="password"
+            :rules="passwordConfirmationRules"
+            required
+          ></v-text-field>
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn min-width="180" color="primary" @click="register">
+          Регистрация
+        </v-btn>
+        <v-spacer></v-spacer>
+        <v-btn min-width="120" color="primary" outlined to="/login">Вход</v-btn>
+      </v-card-actions>
+      <v-card-text v-if="showError" class="error--text">
+        {{ errorMessage }}
+      </v-card-text>
+    </template>
+    <template v-else>
+      <v-card-text class="text-center success--text text-h4 py-10">
+        {{ successMessage }}
+      </v-card-text>
+      <v-card-actions class="justify-center">
+        <v-btn min-width="180" color="primary" to="/login">Вход</v-btn>
+      </v-card-actions>
+    </template>
   </v-card>
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   name: "register-form",
   data: () => ({
     valid: false,
-    registerUserName: "",
-    registerPassword: "",
-    registerPasswordConfirmation: "",
-    registerUserNameRules: [(v) => !!v || "Введите имя пользователя"],
-    registerPasswordRules: [(v) => !!v || "Введите пароль"],
-    registerPasswordConfirmationRules: [
-      (v) => !!v || "Подтвердите введенный пароль",
-    ],
-    showRegisterError: false,
-    registerErrorMessage: "",
+    username: "",
+    password: "",
+    passwordConfirmation: "",
+    usernameRules: [(v) => !!v || "Введите имя пользователя"],
+    passwordRules: [(v) => !!v || "Введите пароль"],
+    passwordConfirmationRules: [(v) => !!v || "Подтвердите введенный пароль"],
+    showError: false,
+    errorMessage: "",
+    showSuccess: false,
+    successMessage: "",
   }),
+  created() {
+    this.logout();
+  },
   methods: {
+    ...mapActions(["logout"]),
     async register() {
-      if (this.$refs.registerForm.validate()) {
-        if (this.registerPassword !== this.registerPasswordConfirmation) {
-          this.showRegisterError = true;
-          this.registerErrorMessage = "Введенные пароли не совпадают";
+      if (this.$refs.form.validate()) {
+        if (this.password !== this.passwordConfirmation) {
+          this.showError = true;
+          this.errorMessage = "Введенные пароли не совпадают";
           return;
         }
         let data = {
-          username: this.registerUserName,
-          password: this.registerPassword,
+          username: this.username,
+          password: this.password,
         };
         this.$store
           .dispatch("register", data)
-          .then(() => this.$router.replace({ name: "user" }))
+          .then((response) => {
+            this.showSuccess = true;
+            this.successMessage = response.data.message;
+          })
           .catch((error) => {
-            localStorage.removeItem("token");
-            this.showRegisterError = true;
-            console.log(error.response.data)
+            this.showError = true;
             if (error.response && error.response.status === 400) {
-              this.registerErrorMessage = error.response.data.error;
+              this.errorMessage = error.response.data.error;
             } else {
-              this.registerErrorMessage = "Ошибка сервера";
+              this.errorMessage = "Ошибка сервера";
             }
           });
       }

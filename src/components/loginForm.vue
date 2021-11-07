@@ -4,19 +4,20 @@
       <v-toolbar-title class="mx-auto text-uppercase">Вход</v-toolbar-title>
     </v-toolbar>
     <v-card-text>
-      <v-form ref="loginForm" v-model="valid" lazy-validation>
+      <v-form ref="form" v-model="valid">
         <v-text-field
-          v-model="loginUserName"
+          v-model="username"
           label="Имя пользователя"
           type="text"
-          :rules="loginUserNameRules"
+          :rules="usernameRules"
+          autofocus
           required
         ></v-text-field>
         <v-text-field
-          v-model="loginPassword"
+          v-model="password"
           label="Пароль"
           type="password"
-          :rules="loginPasswordRules"
+          :rules="passwordRules"
           required
         ></v-text-field>
       </v-form>
@@ -28,41 +29,45 @@
         Регистрация
       </v-btn>
     </v-card-actions>
-    <v-card-text v-if="showLoginError" class="error--text">
-      {{ loginErrorMessage }}
+    <v-card-text v-if="showError" class="error--text">
+      {{ errorMessage }}
     </v-card-text>
   </v-card>
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   name: "login-form",
   data: () => ({
     valid: false,
-    loginUserName: "",
-    loginPassword: "",
-    loginUserNameRules: [(v) => !!v || "Введите имя пользователя"],
-    loginPasswordRules: [(v) => !!v || "Введите пароль"],
-    showLoginError: false,
-    loginErrorMessage: "",
+    username: "",
+    password: "",
+    usernameRules: [(v) => !!v || "Введите имя пользователя"],
+    passwordRules: [(v) => !!v || "Введите пароль"],
+    showError: false,
+    errorMessage: "",
   }),
+  created() {
+    this.logout();
+  },
   methods: {
+    ...mapActions(["logout"]),
     async login() {
-      if (this.$refs.loginForm.validate()) {
+      if (this.$refs.form.validate()) {
         let data = {
-          username: this.loginUserName,
-          password: this.loginPassword,
+          username: this.username,
+          password: this.password,
         };
         this.$store
           .dispatch("login", data)
           .then(() => this.$router.replace({ name: "user" }))
           .catch((error) => {
-            localStorage.removeItem("token");
-            this.showLoginError = true;
+            this.showError = true;
             if (error.response && error.response.status === 401) {
-              this.loginErrorMessage = error.response.data.error;
+              this.errorMessage = error.response.data.error;
             } else {
-              this.loginErrorMessage = "Ошибка сервера";
+              this.errorMessage = "Ошибка сервера";
             }
           });
       }

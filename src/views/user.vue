@@ -1,8 +1,10 @@
 <template>
-  <h1>user</h1>
+  <user-card />
 </template>
 <script>
+import userCard from "../components/userCard.vue";
 export default {
   name: "user",
+  components: { userCard },
 };
 </script>
