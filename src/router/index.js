@@ -47,7 +47,7 @@ router.beforeEach((to, from, next) => {
     if (!store.getters.is_logged_in) {
       next();
     } else {
-      next("/");
+      next({ name: "user" });
     }
   }
 });

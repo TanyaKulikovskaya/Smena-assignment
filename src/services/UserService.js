@@ -19,7 +19,6 @@ export default {
   },
   logout() {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
   },
   async register({ username, password }) {
     const response = await HTTP.post("/register", {
