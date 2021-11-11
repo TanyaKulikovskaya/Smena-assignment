@@ -40,11 +40,15 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (store.getters.is_logged_in) {
       next();
-      return;
+    } else {
+      next({ name: "login" });
     }
-    next("/login");
   } else {
-    next();
+    if (!store.getters.is_logged_in) {
+      next();
+    } else {
+      next("/");
+    }
   }
 });
 
