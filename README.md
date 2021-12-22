@@ -1,4 +1,4 @@
-# smena-assignment
+# Smena-assignment
 
 ## Project setup
 ```
